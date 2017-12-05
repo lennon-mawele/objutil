@@ -37,17 +37,17 @@ How to use?
   ```
 * To get a value in an object:
   ```javascript
-  import {jump} from '@thenewvu/objutil'
+  import {get} from '@thenewvu/objutil'
 
   const obj = {
     a: {b: {c: 1}},
     x: {y: {z: 2}}
   }
-  expect(jump(obj, 'a.b.c')).toEqual(1)
-  expect(jump(obj, 'a.b')).toEqual({c: 1})
-  expect(jump(obj, 'x.y.z')).toEqual(2)
-  expect(jump(obj, 'x.y')).toEqual({z: 2})
-  expect(jump(obj, 'x.a')).toEqual(undefined)
+  expect(get(obj, 'a.b.c')).toEqual(1)
+  expect(get(obj, 'a.b')).toEqual({c: 1})
+  expect(get(obj, 'x.y.z')).toEqual(2)
+  expect(get(obj, 'x.y')).toEqual({z: 2})
+  expect(get(obj, 'x.a')).toEqual(undefined)
   ```
 * To test if an object matches another object
   ```javascript
@@ -66,25 +66,25 @@ How to use?
   expect(test(obj1, obj2)).toEqual(true)
   expect(test(obj1, obj3)).toEqual(false)
   ```
-* To mutate an object
+* To set inplace (mutate) an object
   ```javascript
-  import {mutate} from '@thenewvu/objutil'
+  import {setin} from '@thenewvu/objutil'
 
   const obj = {
     a: {b: {c: 'old'}},
   }
-  mutate(obj, 'a.b.c', 'new')
+  setin(obj, 'a.b.c', 'new')
   expect(obj).toEqual({
     a: {b: {c: 'new'}},
   })
-  mutate(obj, 'a.b.c', c => c + 'new')
+  setin(obj, 'a.b.c', c => c + 'new')
   expect(obj).toEqual({
     a: {b: {c: 'newnew'}},
   })
   ```
-* To change an object immutably
+* To set an object immutably
   ```javascript
-  import {immutate} from '@thenewvu/objutil'
+  import {set} from '@thenewvu/objutil'
 
   const obj1 = {
     a: {b: {c: 'old', d: {e: 'old'}}},
@@ -98,7 +98,7 @@ How to use?
   const {y} = x
   const {z} = y
 
-  const obj2 = immutate(obj1, 'a.b.c', 'new')
+  const obj2 = set(obj1, 'a.b.c', 'new')
   expect(obj2 !== obj1).toEqual(true)
   expect(obj2.a !== a).toEqual(true)
   expect(obj2.a.b !== b).toEqual(true)
@@ -109,7 +109,7 @@ How to use?
   expect(obj2.x.y === y).toEqual(true)
   expect(obj2.x.y.z === z).toEqual(true)
 
-  const obj3 = immutate(obj1, 'a.b.d.e', e => e + 'new')
+  const obj3 = set(obj1, 'a.b.d.e', e => e + 'new')
   expect(obj3 !== obj1).toEqual(true)
   expect(obj3.a !== a).toEqual(true)
   expect(obj3.a.b !== b).toEqual(true)
@@ -149,10 +149,10 @@ How to use?
   const {k} = j
 
   const obj2 = exec.on(obj1)(
-    exec.at('a.b.d', d => d || {}),
-    exec.at('a.b.d.e', e => 'new'),
-    exec.at('a.b.c', 'new'),
-    exec.at('x.y.z', 'new')
+    exec.set('a.b.d', d => d || {}),
+    exec.set('a.b.d.e', e => 'new'),
+    exec.set('a.b.c', 'new'),
+    exec.set('x.y.z', 'new')
   )
   expect(obj2 !== obj1).toEqual(true)
   expect(obj2.a !== a).toEqual(true)

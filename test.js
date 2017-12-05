@@ -1,6 +1,6 @@
 /* global test, describe, expect */
 
-import {jump, walk, test as _test, mutate, immutate, exec} from './main'
+import {get, walk, test as _test, setin, set, exec} from './main'
 
 test('walk', () => {
   const nodepaths = []
@@ -21,18 +21,6 @@ test('walk', () => {
   ])
 })
 
-test('jump', () => {
-  const obj = {
-    a: {b: {c: 1}},
-    x: {y: {z: 2}}
-  }
-  expect(jump(obj, 'a.b.c')).toEqual(1)
-  expect(jump(obj, 'a.b')).toEqual({c: 1})
-  expect(jump(obj, 'x.y.z')).toEqual(2)
-  expect(jump(obj, 'x.y')).toEqual({z: 2})
-  expect(jump(obj, 'x.a')).toEqual(undefined)
-})
-
 test('test', () => {
   const obj1 = {
     a: {b: {c: 1}},
@@ -48,18 +36,30 @@ test('test', () => {
   expect(_test(obj1, obj3)).toEqual(false)
 })
 
-describe('mutate', () => {
+test('get', () => {
+  const obj = {
+    a: {b: {c: 1}},
+    x: {y: {z: 2}}
+  }
+  expect(get(obj, 'a.b.c')).toEqual(1)
+  expect(get(obj, 'a.b')).toEqual({c: 1})
+  expect(get(obj, 'x.y.z')).toEqual(2)
+  expect(get(obj, 'x.y')).toEqual({z: 2})
+  expect(get(obj, 'x.a')).toEqual(undefined)
+})
+
+describe('setin', () => {
   test('should change the value at the given path', () => {
     const obj = {
       a: {b: {c: 'old'}},
       x: {y: {z: 'old'}}
     }
-    mutate(obj, 'a.b.c', 'new')
+    setin(obj, 'a.b.c', 'new')
     expect(obj).toEqual({
       a: {b: {c: 'new'}},
       x: {y: {z: 'old'}}
     })
-    mutate(obj, 'x.y', {z: 'new'})
+    setin(obj, 'x.y', {z: 'new'})
     expect(obj).toEqual({
       a: {b: {c: 'new'}},
       x: {y: {z: 'new'}}
@@ -71,12 +71,12 @@ describe('mutate', () => {
       a: {b: {c: 'old'}},
       x: {y: {z: 'old'}}
     }
-    mutate(obj, 'a.b.c', c => c + 'new')
+    setin(obj, 'a.b.c', c => c + 'new')
     expect(obj).toEqual({
       a: {b: {c: 'oldnew'}},
       x: {y: {z: 'old'}}
     })
-    mutate(obj, 'x.y', y => ({z: y.z + 'new'}))
+    setin(obj, 'x.y', y => ({z: y.z + 'new'}))
     expect(obj).toEqual({
       a: {b: {c: 'oldnew'}},
       x: {y: {z: 'oldnew'}}
@@ -84,7 +84,7 @@ describe('mutate', () => {
   })
 })
 
-describe('immutate', () => {
+describe('set', () => {
   test('should update the value at the given path immutably', () => {
     const obj1 = {
       a: {b: {c: 'old', d: {e: 'old'}}},
@@ -98,7 +98,7 @@ describe('immutate', () => {
     const {y} = x
     const {z} = y
 
-    const obj2 = immutate(obj1, 'a.b.c', 'new')
+    const obj2 = set(obj1, 'a.b.c', 'new')
     expect(obj2 !== obj1).toEqual(true)
     expect(obj2.a !== a).toEqual(true)
     expect(obj2.a.b !== b).toEqual(true)
@@ -109,7 +109,7 @@ describe('immutate', () => {
     expect(obj2.x.y === y).toEqual(true)
     expect(obj2.x.y.z === z).toEqual(true)
 
-    const obj3 = immutate(obj1, 'a.b.d.e', 'new')
+    const obj3 = set(obj1, 'a.b.d.e', 'new')
     expect(obj3 !== obj1).toEqual(true)
     expect(obj3.a !== a).toEqual(true)
     expect(obj3.a.b !== b).toEqual(true)
@@ -143,7 +143,7 @@ describe('immutate', () => {
     const {y} = x
     const {z} = y
 
-    const obj2 = immutate(obj1, 'a.b.c', c => c + 'new')
+    const obj2 = set(obj1, 'a.b.c', c => c + 'new')
     expect(obj2 !== obj1).toEqual(true)
     expect(obj2.a !== a).toEqual(true)
     expect(obj2.a.b !== b).toEqual(true)
@@ -154,7 +154,7 @@ describe('immutate', () => {
     expect(obj2.x.y === y).toEqual(true)
     expect(obj2.x.y.z === z).toEqual(true)
 
-    const obj3 = immutate(obj1, 'a.b.d.e', e => e + 'new')
+    const obj3 = set(obj1, 'a.b.d.e', e => e + 'new')
     expect(obj3 !== obj1).toEqual(true)
     expect(obj3.a !== a).toEqual(true)
     expect(obj3.a.b !== b).toEqual(true)
@@ -193,10 +193,10 @@ test('exec', () => {
   const {k} = j
 
   const obj2 = exec.on(obj1)(
-    exec.at('a.b.d', d => d || {}),
-    exec.at('a.b.d.e', e => 'new'),
-    exec.at('a.b.c', 'new'),
-    exec.at('x.y.z', 'new')
+    exec.set('a.b.d', d => d || {}),
+    exec.set('a.b.d.e', e => 'new'),
+    exec.set('a.b.c', 'new'),
+    exec.set('x.y.z', 'new')
   )
   expect(obj2).toEqual({
     a: {b: {c: 'new', d: {e: 'new'}}},

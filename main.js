@@ -13,16 +13,6 @@ export const walk = (obj, fn, path = '') => {
   })
 }
 
-export const jump = (obj, to) => {
-  if (!obj) return undefined
-  if (!to) return obj
-  const firstDot = to.indexOf('.')
-  if (firstDot === -1) return obj[to]
-  const firstKey = to.slice(0, firstDot)
-  const restPath = to.slice(firstDot + 1)
-  return jump(obj[firstKey], restPath)
-}
-
 export const test = (obj1, obj2) => {
   if (isPrimitive(obj1) || isPrimitive(obj2)) return obj1 === obj2
   const keys = Object.keys(obj2)
@@ -32,7 +22,17 @@ export const test = (obj1, obj2) => {
   return true
 }
 
-export const mutate = (obj, at, val) => {
+export const get = (obj, at) => {
+  if (!obj) return undefined
+  if (!at) return obj
+  const firstDot = at.indexOf('.')
+  if (firstDot === -1) return obj[at]
+  const firstKey = at.slice(0, firstDot)
+  const restPath = at.slice(firstDot + 1)
+  return get(obj[firstKey], restPath)
+}
+
+export const setin = (obj, at, val) => {
   if (!obj || !at) return
   const firstDot = at.indexOf('.')
   if (firstDot === -1) {
@@ -40,11 +40,12 @@ export const mutate = (obj, at, val) => {
   } else {
     const firstKey = at.slice(0, firstDot)
     const restPath = at.slice(firstDot + 1)
-    mutate(obj[firstKey], restPath, val)
+    setin(obj[firstKey], restPath, val)
   }
+  return obj
 }
 
-export const immutate = (obj, at, val) => {
+export const set = (obj, at, val) => {
   if (!obj || !at) return obj
   const firstDot = at.indexOf('.')
   if (firstDot === -1) {
@@ -52,11 +53,12 @@ export const immutate = (obj, at, val) => {
   } else {
     const firstKey = at.slice(0, firstDot)
     const restPath = at.slice(firstDot + 1)
-    return {...obj, [firstKey]: immutate(obj[firstKey], restPath, val)}
+    return {...obj, [firstKey]: set(obj[firstKey], restPath, val)}
   }
 }
 
 export const exec = {
   on: obj => (...ops) => ops.reduce((cur, op) => op(cur), obj),
-  at: (at, val) => obj => immutate(obj, at, val)
+  set: (at, val) => obj => set(obj, at, val),
+  setin: (at, val) => obj => setin(obj, at, val)
 }
