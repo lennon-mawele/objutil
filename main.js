@@ -32,33 +32,45 @@ export const get = (obj, at) => {
   return get(obj[firstKey], restPath)
 }
 
-export const setin = (obj, at, val) => {
+export const finset = (obj, at, fn) => {
   if (!obj || !at) return
   const firstDot = at.indexOf('.')
   if (firstDot === -1) {
-    obj[at] = typeof val === 'function' ? val(obj[at]) : val
+    obj[at] = fn(obj[at])
   } else {
     const firstKey = at.slice(0, firstDot)
     const restPath = at.slice(firstDot + 1)
-    setin(obj[firstKey], restPath, val)
+    finset(obj[firstKey], restPath, fn)
   }
   return obj
 }
 
-export const set = (obj, at, val) => {
+export const inset = (obj, at, val) => {
+  return finset(obj, at, () => val)
+}
+
+export const fset = (obj, at, fn) => {
   if (!obj || !at) return obj
   const firstDot = at.indexOf('.')
   if (firstDot === -1) {
-    return {...obj, [at]: typeof val === 'function' ? val(obj[at]) : val}
+    return {...obj, [at]: fn(obj[at])}
   } else {
     const firstKey = at.slice(0, firstDot)
     const restPath = at.slice(firstDot + 1)
-    return {...obj, [firstKey]: set(obj[firstKey], restPath, val)}
+    return {...obj, [firstKey]: fset(obj[firstKey], restPath, fn)}
   }
+}
+
+export const set = (obj, at, val) => {
+  return fset(obj, at, () => val)
 }
 
 export const exec = {
   on: obj => (...ops) => ops.reduce((cur, op) => op(cur), obj),
   set: (at, val) => obj => set(obj, at, val),
-  setin: (at, val) => obj => setin(obj, at, val)
+  fset: (at, fn) => obj => fset(obj, at, fn),
+  inset: (at, val) => obj => inset(obj, at, val),
+  finset: (at, fn) => obj => finset(obj, at, fn)
 }
+
+export const obtain = get

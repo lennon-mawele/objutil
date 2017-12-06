@@ -1,6 +1,6 @@
-/* global test, describe, expect */
+/* global test, expect */
 
-import {get, walk, test as _test, setin, set, exec} from './main'
+import {get, walk, test as _test, inset, finset, set, fset, exec} from './main'
 
 test('walk', () => {
   const nodepaths = []
@@ -48,132 +48,137 @@ test('get', () => {
   expect(get(obj, 'x.a')).toEqual(undefined)
 })
 
-describe('setin', () => {
-  test('should change the value at the given path', () => {
-    const obj = {
-      a: {b: {c: 'old'}},
-      x: {y: {z: 'old'}}
-    }
-    setin(obj, 'a.b.c', 'new')
-    expect(obj).toEqual({
-      a: {b: {c: 'new'}},
-      x: {y: {z: 'old'}}
-    })
-    setin(obj, 'x.y', {z: 'new'})
-    expect(obj).toEqual({
-      a: {b: {c: 'new'}},
-      x: {y: {z: 'new'}}
-    })
+test('inset', () => {
+  const obj = {
+    a: {b: {c: 'old'}},
+    x: {y: {z: 'old'}}
+  }
+  inset(obj, 'a.b.c', 'new')
+  expect(obj).toEqual({
+    a: {b: {c: 'new'}},
+    x: {y: {z: 'old'}}
   })
-
-  test('should apply the updater at the given path', () => {
-    const obj = {
-      a: {b: {c: 'old'}},
-      x: {y: {z: 'old'}}
-    }
-    setin(obj, 'a.b.c', c => c + 'new')
-    expect(obj).toEqual({
-      a: {b: {c: 'oldnew'}},
-      x: {y: {z: 'old'}}
-    })
-    setin(obj, 'x.y', y => ({z: y.z + 'new'}))
-    expect(obj).toEqual({
-      a: {b: {c: 'oldnew'}},
-      x: {y: {z: 'oldnew'}}
-    })
+  inset(obj, 'x.y', {z: 'new'})
+  expect(obj).toEqual({
+    a: {b: {c: 'new'}},
+    x: {y: {z: 'new'}}
   })
 })
 
-describe('set', () => {
-  test('should update the value at the given path immutably', () => {
-    const obj1 = {
-      a: {b: {c: 'old', d: {e: 'old'}}},
-      x: {y: {z: 'old'}}
-    }
-    const {a} = obj1
-    const {b} = a
-    const {c, d} = b
-    const {e} = d
-    const {x} = obj1
-    const {y} = x
-    const {z} = y
-
-    const obj2 = set(obj1, 'a.b.c', 'new')
-    expect(obj2 !== obj1).toEqual(true)
-    expect(obj2.a !== a).toEqual(true)
-    expect(obj2.a.b !== b).toEqual(true)
-    expect(obj2.a.b.c === 'new').toEqual(true)
-    expect(obj2.a.b.d === d).toEqual(true)
-    expect(obj2.a.b.d.e === e).toEqual(true)
-    expect(obj2.x === x).toEqual(true)
-    expect(obj2.x.y === y).toEqual(true)
-    expect(obj2.x.y.z === z).toEqual(true)
-
-    const obj3 = set(obj1, 'a.b.d.e', 'new')
-    expect(obj3 !== obj1).toEqual(true)
-    expect(obj3.a !== a).toEqual(true)
-    expect(obj3.a.b !== b).toEqual(true)
-    expect(obj3.a.b.c === c).toEqual(true)
-    expect(obj3.a.b.d !== d).toEqual(true)
-    expect(obj3.a.b.d.e === 'new').toEqual(true)
-    expect(obj3.x === x).toEqual(true)
-    expect(obj3.x.y === y).toEqual(true)
-    expect(obj3.x.y.z === z).toEqual(true)
-
-    expect(obj1.a === a).toEqual(true)
-    expect(obj1.a.b === b).toEqual(true)
-    expect(obj1.a.b.c === c).toEqual(true)
-    expect(obj1.a.b.d === d).toEqual(true)
-    expect(obj1.a.b.d.e === e).toEqual(true)
-    expect(obj1.x === x).toEqual(true)
-    expect(obj1.x.y === y).toEqual(true)
-    expect(obj1.x.y.z === z).toEqual(true)
+test('finset', () => {
+  const obj = {
+    a: {b: {c: 'old'}},
+    x: {y: {z: 'old'}},
+    i: 'old'
+  }
+  finset(obj, 'a.b.c', c => c + 'new')
+  expect(obj).toEqual({
+    a: {b: {c: 'oldnew'}},
+    x: {y: {z: 'old'}},
+    i: 'old'
   })
-
-  test('should apply the updater at the given path immutably', () => {
-    const obj1 = {
-      a: {b: {c: 'old', d: {e: 'old'}}},
-      x: {y: {z: 'old'}}
-    }
-    const {a} = obj1
-    const {b} = a
-    const {c, d} = b
-    const {e} = d
-    const {x} = obj1
-    const {y} = x
-    const {z} = y
-
-    const obj2 = set(obj1, 'a.b.c', c => c + 'new')
-    expect(obj2 !== obj1).toEqual(true)
-    expect(obj2.a !== a).toEqual(true)
-    expect(obj2.a.b !== b).toEqual(true)
-    expect(obj2.a.b.c === 'oldnew').toEqual(true)
-    expect(obj2.a.b.d === d).toEqual(true)
-    expect(obj2.a.b.d.e === e).toEqual(true)
-    expect(obj2.x === x).toEqual(true)
-    expect(obj2.x.y === y).toEqual(true)
-    expect(obj2.x.y.z === z).toEqual(true)
-
-    const obj3 = set(obj1, 'a.b.d.e', e => e + 'new')
-    expect(obj3 !== obj1).toEqual(true)
-    expect(obj3.a !== a).toEqual(true)
-    expect(obj3.a.b !== b).toEqual(true)
-    expect(obj3.a.b.c === c).toEqual(true)
-    expect(obj3.a.b.d !== d).toEqual(true)
-    expect(obj3.a.b.d.e === 'oldnew').toEqual(true)
-    expect(obj3.x === x).toEqual(true)
-    expect(obj3.x.y === y).toEqual(true)
-    expect(obj3.x.y.z === z).toEqual(true)
-
-    expect(obj1.a === a).toEqual(true)
-    expect(obj1.a.b === b).toEqual(true)
-    expect(obj1.a.b.c === c).toEqual(true)
-    expect(obj1.a.b.d === d).toEqual(true)
-    expect(obj1.a.b.d.e === e).toEqual(true)
-    expect(obj1.x === x).toEqual(true)
-    expect(obj1.x.y === y).toEqual(true)
-    expect(obj1.x.y.z === z).toEqual(true)
+  finset(obj, 'x.y', y => ({z: y.z + 'new'}))
+  expect(obj).toEqual({
+    a: {b: {c: 'oldnew'}},
+    x: {y: {z: 'oldnew'}},
+    i: 'old'
   })
+  finset(obj, 'i', i => i + 'new')
+  expect(obj).toEqual({
+    a: {b: {c: 'oldnew'}},
+    x: {y: {z: 'oldnew'}},
+    i: 'oldnew'
+  })
+})
+
+test('set', () => {
+  const obj1 = {
+    a: {b: {c: 'old', d: {e: 'old'}}},
+    x: {y: {z: 'old'}}
+  }
+  const {a} = obj1
+  const {b} = a
+  const {c, d} = b
+  const {e} = d
+  const {x} = obj1
+  const {y} = x
+  const {z} = y
+
+  const obj2 = set(obj1, 'a.b.c', 'new')
+  expect(obj2 !== obj1).toEqual(true)
+  expect(obj2.a !== a).toEqual(true)
+  expect(obj2.a.b !== b).toEqual(true)
+  expect(obj2.a.b.c === 'new').toEqual(true)
+  expect(obj2.a.b.d === d).toEqual(true)
+  expect(obj2.a.b.d.e === e).toEqual(true)
+  expect(obj2.x === x).toEqual(true)
+  expect(obj2.x.y === y).toEqual(true)
+  expect(obj2.x.y.z === z).toEqual(true)
+
+  const obj3 = set(obj1, 'a.b.d.e', 'new')
+  expect(obj3 !== obj1).toEqual(true)
+  expect(obj3.a !== a).toEqual(true)
+  expect(obj3.a.b !== b).toEqual(true)
+  expect(obj3.a.b.c === c).toEqual(true)
+  expect(obj3.a.b.d !== d).toEqual(true)
+  expect(obj3.a.b.d.e === 'new').toEqual(true)
+  expect(obj3.x === x).toEqual(true)
+  expect(obj3.x.y === y).toEqual(true)
+  expect(obj3.x.y.z === z).toEqual(true)
+
+  expect(obj1.a === a).toEqual(true)
+  expect(obj1.a.b === b).toEqual(true)
+  expect(obj1.a.b.c === c).toEqual(true)
+  expect(obj1.a.b.d === d).toEqual(true)
+  expect(obj1.a.b.d.e === e).toEqual(true)
+  expect(obj1.x === x).toEqual(true)
+  expect(obj1.x.y === y).toEqual(true)
+  expect(obj1.x.y.z === z).toEqual(true)
+})
+
+test('fset', () => {
+  const obj1 = {
+    a: {b: {c: 'old', d: {e: 'old'}}},
+    x: {y: {z: 'old'}}
+  }
+  const {a} = obj1
+  const {b} = a
+  const {c, d} = b
+  const {e} = d
+  const {x} = obj1
+  const {y} = x
+  const {z} = y
+
+  const obj2 = fset(obj1, 'a.b.c', c => c + 'new')
+  expect(obj2 !== obj1).toEqual(true)
+  expect(obj2.a !== a).toEqual(true)
+  expect(obj2.a.b !== b).toEqual(true)
+  expect(obj2.a.b.c === 'oldnew').toEqual(true)
+  expect(obj2.a.b.d === d).toEqual(true)
+  expect(obj2.a.b.d.e === e).toEqual(true)
+  expect(obj2.x === x).toEqual(true)
+  expect(obj2.x.y === y).toEqual(true)
+  expect(obj2.x.y.z === z).toEqual(true)
+
+  const obj3 = fset(obj1, 'a.b.d.e', e => e + 'new')
+  expect(obj3 !== obj1).toEqual(true)
+  expect(obj3.a !== a).toEqual(true)
+  expect(obj3.a.b !== b).toEqual(true)
+  expect(obj3.a.b.c === c).toEqual(true)
+  expect(obj3.a.b.d !== d).toEqual(true)
+  expect(obj3.a.b.d.e === 'oldnew').toEqual(true)
+  expect(obj3.x === x).toEqual(true)
+  expect(obj3.x.y === y).toEqual(true)
+  expect(obj3.x.y.z === z).toEqual(true)
+
+  expect(obj1.a === a).toEqual(true)
+  expect(obj1.a.b === b).toEqual(true)
+  expect(obj1.a.b.c === c).toEqual(true)
+  expect(obj1.a.b.d === d).toEqual(true)
+  expect(obj1.a.b.d.e === e).toEqual(true)
+  expect(obj1.x === x).toEqual(true)
+  expect(obj1.x.y === y).toEqual(true)
+  expect(obj1.x.y.z === z).toEqual(true)
 })
 
 test('exec', () => {
@@ -193,8 +198,8 @@ test('exec', () => {
   const {k} = j
 
   const obj2 = exec.on(obj1)(
-    exec.set('a.b.d', d => d || {}),
-    exec.set('a.b.d.e', e => 'new'),
+    exec.fset('a.b.d', d => d || {}),
+    exec.fset('a.b.d.e', e => 'new'),
     exec.set('a.b.c', 'new'),
     exec.set('x.y.z', 'new')
   )

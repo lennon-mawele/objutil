@@ -2,9 +2,11 @@
   "name": "@thenewvu/objutil",
   "version": "1.0.0",
   "description": "A minimal library provides utility functions for working on objects",
-  "main": "main.js",
+  "main": "dist.js",
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "build": "babel main.js --out-file dist.js",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,9 @@
   },
   "homepage": "https://github.com/thenewvu/objutil#readme",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-2": "^6.24.1",
     "jest": "^21.2.1"
   }
 }

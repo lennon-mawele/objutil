@@ -1,11 +1,10 @@
- {
-   "presets": [
-     ["env",
-       {
-         "targets": {
-           "node": "current"
-         }
-       }],
-     "jest"
-   ]
- }
+{
+  "presets": [
+    ["env", {
+      "targets": {
+        "browsers": ["last 2 versions", "safari >= 7"]
+      }
+    }],
+    "stage-2"
+  ]
+}

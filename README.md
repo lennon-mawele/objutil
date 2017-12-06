@@ -7,9 +7,15 @@ Why this?
 =========
 
 I know, there're ton of libraries for the purpose out there, I tried many of
-  them, they're both good and bad depending on the jugdement perspective. I
-  gave up on them because when solving real problems, they always have a way to
-  fuck up my code. So this is my attemp.
+  them, they're both good and bad depending on the jugdement perspective. 
+ 
+But I come up with this because I want:
+
+* *Clarify what mutates and what immutates the origin object* - it has `set` - immutates, `inset` - mutates.
+* *Don't revent the wheel* - Only provide what built-in JS doesn't provide. So it doesn't include `Object.*` and `Array.*`.
+* *Extensibility* - `fset` and `finset` comes for this, do whatever you want on the old value then return the new value.
+* *Work with React/Redux states* - See `set` and `fset` examples below.
+* *No surprise* - `set`, `fset`, `inset` and `finset` *won't* create intermediate objects if the path doesn't exist.
 
 How to use?
 ===========
@@ -66,25 +72,25 @@ How to use?
   expect(test(obj1, obj2)).toEqual(true)
   expect(test(obj1, obj3)).toEqual(false)
   ```
-* To set inplace (mutate) an object
+* To mutate an object
   ```javascript
-  import {setin} from '@thenewvu/objutil'
+  import {inset, finset} from '@thenewvu/objutil'
 
   const obj = {
     a: {b: {c: 'old'}},
   }
-  setin(obj, 'a.b.c', 'new')
+  inset(obj, 'a.b.c', 'new')
   expect(obj).toEqual({
     a: {b: {c: 'new'}},
   })
-  setin(obj, 'a.b.c', c => c + 'new')
+  finset(obj, 'a.b.c', c => c + 'new')
   expect(obj).toEqual({
     a: {b: {c: 'newnew'}},
   })
   ```
-* To set an object immutably
+* To set an object immutably (don't change the origin object, return the changed object)
   ```javascript
-  import {set} from '@thenewvu/objutil'
+  import {set, fset} from '@thenewvu/objutil'
 
   const obj1 = {
     a: {b: {c: 'old', d: {e: 'old'}}},
@@ -109,7 +115,7 @@ How to use?
   expect(obj2.x.y === y).toEqual(true)
   expect(obj2.x.y.z === z).toEqual(true)
 
-  const obj3 = set(obj1, 'a.b.d.e', e => e + 'new')
+  const obj3 = fset(obj1, 'a.b.d.e', e => e + 'new')
   expect(obj3 !== obj1).toEqual(true)
   expect(obj3.a !== a).toEqual(true)
   expect(obj3.a.b !== b).toEqual(true)
@@ -149,11 +155,13 @@ How to use?
   const {k} = j
 
   const obj2 = exec.on(obj1)(
-    exec.set('a.b.d', d => d || {}),
-    exec.set('a.b.d.e', e => 'new'),
+    exec.fset('a.b.d', d => d || {}),
+    exec.fset('a.b.d.e', e => 'new'),
     exec.set('a.b.c', 'new'),
     exec.set('x.y.z', 'new')
   )
+
+  // only change what need to be changed
   expect(obj2 !== obj1).toEqual(true)
   expect(obj2.a !== a).toEqual(true)
   expect(obj2.a.b !== b).toEqual(true)
@@ -165,7 +173,8 @@ How to use?
   expect(obj2.i === i).toEqual(true)
   expect(obj2.i.j === j).toEqual(true)
   expect(obj2.i.j.k === k).toEqual(true)
-
+  
+  // no change on origin object
   expect(obj1.a === a).toEqual(true)
   expect(obj1.a.b === b).toEqual(true)
   expect(obj1.a.b.c === c).toEqual(true)
