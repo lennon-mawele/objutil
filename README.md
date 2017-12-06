@@ -13,7 +13,7 @@ But I come up with this because I want:
 
 * *Clarify what mutates and what immutates the origin object* - it has `set` - immutates, `inset` - mutates.
 * *Don't revent the wheel* - Only provide what built-in JS doesn't provide. So it doesn't include `Object.*` and `Array.*`.
-* *Extensibility* - `fset` and `finset` comes for this, do whatever you want on the old value then return the new value.
+* *Extensibility* - `fset` and `finset` come for this, do whatever you want with the old value then return the new value.
 * *Work with React/Redux states* - See `set` and `fset` examples below.
 * *No surprise* - `set`, `fset`, `inset` and `finset` *won't* create intermediate objects if the path doesn't exist.
 
