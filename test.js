@@ -94,7 +94,8 @@ test('finset', () => {
 test('set', () => {
   const obj1 = {
     a: {b: {c: 'old', d: {e: 'old'}}},
-    x: {y: {z: 'old'}}
+    x: {y: {z: 'old'}},
+    i: {}
   }
   const {a} = obj1
   const {b} = a
@@ -103,6 +104,7 @@ test('set', () => {
   const {x} = obj1
   const {y} = x
   const {z} = y
+  const {i} = obj1
 
   const obj2 = set(obj1, 'a.b.c', 'new')
   expect(obj2 !== obj1).toEqual(true)
@@ -114,6 +116,7 @@ test('set', () => {
   expect(obj2.x === x).toEqual(true)
   expect(obj2.x.y === y).toEqual(true)
   expect(obj2.x.y.z === z).toEqual(true)
+  expect(obj2.i === i).toEqual(true)
 
   const obj3 = set(obj1, 'a.b.d.e', 'new')
   expect(obj3 !== obj1).toEqual(true)
@@ -125,6 +128,19 @@ test('set', () => {
   expect(obj3.x === x).toEqual(true)
   expect(obj3.x.y === y).toEqual(true)
   expect(obj3.x.y.z === z).toEqual(true)
+  expect(obj3.i === i).toEqual(true)
+
+  const obj4 = set(obj1, 'i.j', 'new')
+  expect(obj4.a === a).toEqual(true)
+  expect(obj4.a.b === b).toEqual(true)
+  expect(obj4.a.b.c === c).toEqual(true)
+  expect(obj4.a.b.d === d).toEqual(true)
+  expect(obj4.a.b.d.e === e).toEqual(true)
+  expect(obj4.x === x).toEqual(true)
+  expect(obj4.x.y === y).toEqual(true)
+  expect(obj4.x.y.z === z).toEqual(true)
+  expect(obj4.i !== i).toEqual(true)
+  expect(obj4.i.j === 'new').toEqual(true)
 
   expect(obj1.a === a).toEqual(true)
   expect(obj1.a.b === b).toEqual(true)
@@ -134,6 +150,7 @@ test('set', () => {
   expect(obj1.x === x).toEqual(true)
   expect(obj1.x.y === y).toEqual(true)
   expect(obj1.x.y.z === z).toEqual(true)
+  expect(obj1.i === i).toEqual(true)
 })
 
 test('fset', () => {
